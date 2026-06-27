@@ -28,11 +28,12 @@
         {
           "photosPermission": "Brownies needs access to your photos to upload profile pictures."
         }
-      ],
-      [
-        "expo-secure-store",
-        {}
       ]
-    ]
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/icon.png"
+    }
   }
 }

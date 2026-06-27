@@ -8,10 +8,10 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-ARG EXPO_PUBLIC_API_URL
+ARG EXPO_PUBLIC_API_URL=/api/v1
 ENV EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL}
 
-RUN npx expo export -p web
+RUN npx expo export --platform web 2>&1
 
 FROM nginx:1.27-alpine AS runner
 
