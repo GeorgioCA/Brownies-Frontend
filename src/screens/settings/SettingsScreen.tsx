@@ -8,15 +8,16 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CommonActions } from '@react-navigation/native';
-import type { ProfileStackParamList } from '../../types';
+import { NativeStackScreenProps, NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation, CommonActions } from '@react-navigation/native';
+import type { ProfileStackParamList, RootStackParamList } from '../../types';
 import { useAuthStore } from '../../store/authStore';
 import { colors, spacing, radius, fontSize, fontWeight } from '../../theme';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
+  const rootNav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
@@ -29,7 +30,7 @@ export default function SettingsScreen({ navigation }: Props) {
         style: 'destructive',
         onPress: async () => {
           await logout();
-          navigation.dispatch(
+          rootNav.dispatch(
             CommonActions.reset({
               index: 0,
               routes: [{ name: 'Auth' }],
@@ -38,7 +39,7 @@ export default function SettingsScreen({ navigation }: Props) {
         },
       },
     ]);
-  }, [logout, navigation]);
+  }, [logout, rootNav]);
 
   const handleDeleteAccount = useCallback(() => {
     Alert.alert(
@@ -60,7 +61,7 @@ export default function SettingsScreen({ navigation }: Props) {
                   style: 'destructive',
                   onPress: async () => {
                     await deleteAccount();
-                    navigation.dispatch(
+                    rootNav.dispatch(
                       CommonActions.reset({
                         index: 0,
                         routes: [{ name: 'Auth' }],
@@ -74,7 +75,7 @@ export default function SettingsScreen({ navigation }: Props) {
         },
       ],
     );
-  }, [deleteAccount, navigation]);
+  }, [deleteAccount, rootNav]);
 
   return (
     <SafeAreaView style={styles.safe}>
