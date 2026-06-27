@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Brownies",
+    "slug": "brownies",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5E6D3"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.brownies.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F5E6D3"
+      },
+      "package": "com.brownies.app"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Brownies needs access to your photos to upload profile pictures."
+        }
+      ],
+      [
+        "expo-secure-store",
+        {}
+      ]
+    ]
+  }
+}

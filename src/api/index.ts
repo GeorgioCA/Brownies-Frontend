@@ -1,0 +1,11 @@
+export * as authApi from './auth';
+export * as profileApi from './profile';
+export * as discoveryApi from './discovery';
+export * as matchesApi from './matches';
+export * as messagesApi from './messages';
+export * as notificationsApi from './notifications';
+export * as preferencesApi from './preferences';
+export * as reportsApi from './reports';
+export * as verificationApi from './verification';
+export * as subscriptionsApi from './subscriptions';
+export * as familyShareApi from './familyShare';
