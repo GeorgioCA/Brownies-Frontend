@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   Alert,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -87,6 +88,16 @@ export default function PhoneInputScreen({ navigation }: Props) {
           loading={loading}
           disabled={loading}
         />
+
+        <TouchableOpacity
+          style={styles.loginLink}
+          onPress={() => navigation.navigate('Login')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.loginLinkText}>
+            Already have a password? <Text style={styles.loginLinkBold}>Log in</Text>
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -115,5 +126,18 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.xl,
+  },
+  loginLink: {
+    marginTop: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  loginLinkText: {
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  loginLinkBold: {
+    color: colors.primary,
+    fontWeight: fontWeight.semiBold,
   },
 });
