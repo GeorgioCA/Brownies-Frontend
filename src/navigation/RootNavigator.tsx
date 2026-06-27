@@ -22,6 +22,11 @@ export function RootNavigator() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const profileComplete = useAuthStore((s) => s.profileComplete);
+  const restoreSession = useAuthStore((s) => s.restoreSession);
+
+  useEffect(() => {
+    restoreSession();
+  }, []);
 
   if (isLoading) {
     return <LoadingSpinner fullScreen message="Loading..." />;
