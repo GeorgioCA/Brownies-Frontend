@@ -21,7 +21,7 @@ import { colors, fontSize, fontWeight, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
-const PHONE_MAX_LENGTH = 10;
+const PHONE_MAX_LENGTH = 15;
 
 export default function LoginScreen({ navigation: authNavigation }: Props) {
   const rootNavigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -38,8 +38,8 @@ export default function LoginScreen({ navigation: authNavigation }: Props) {
       Alert.alert('Missing phone', 'Please enter your phone number.');
       return;
     }
-    if (trimmed.length < PHONE_MAX_LENGTH) {
-      Alert.alert('Invalid phone', 'Please enter a valid 10-digit number.');
+    if (trimmed.length < 10) {
+      Alert.alert('Invalid phone', 'Please enter a valid phone number.');
       return;
     }
     if (!password) {
@@ -49,7 +49,7 @@ export default function LoginScreen({ navigation: authNavigation }: Props) {
 
     setLoading(true);
     try {
-      await login(`+91${trimmed}`, password);
+      await login(trimmed, password);
       rootNavigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } catch (err: unknown) {
       const message =
@@ -78,10 +78,9 @@ export default function LoginScreen({ navigation: authNavigation }: Props) {
         <Input
           value={phone}
           onChangeText={setPhone}
-          placeholder="Enter phone number"
+          placeholder="Phone (e.g. +919999912345 or 0000000000)"
           keyboardType="phone-pad"
           maxLength={PHONE_MAX_LENGTH}
-          prefix="+91"
           autoFocus
         />
 
