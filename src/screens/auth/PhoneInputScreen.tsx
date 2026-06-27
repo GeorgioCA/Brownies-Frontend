@@ -19,7 +19,7 @@ import { colors, fontSize, fontWeight, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'PhoneInput'>;
 
-const PHONE_MAX_LENGTH = 10;
+const PHONE_MAX_LENGTH = 15;
 
 export default function PhoneInputScreen({ navigation }: Props) {
   const [phone, setPhone] = useState('');
@@ -33,19 +33,18 @@ export default function PhoneInputScreen({ navigation }: Props) {
       Alert.alert('Missing phone', 'Please enter your phone number.');
       return;
     }
-    if (trimmed.length < PHONE_MAX_LENGTH) {
-      Alert.alert('Invalid phone', 'Please enter a valid 10-digit number.');
+    if (trimmed.length < 10) {
+      Alert.alert('Invalid phone', 'Please enter a valid phone number.');
       return;
     }
 
     setLoading(true);
     try {
-      const fullPhone = `+91${trimmed}`;
-      const otp = await sendOtp(fullPhone);
+      const otp = await sendOtp(trimmed);
       Alert.alert('OTP Sent', `Your OTP is: ${otp}`, [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('OtpVerify', { phone_number: fullPhone }),
+          onPress: () => navigation.navigate('OtpVerify', { phone_number: trimmed }),
         },
       ]);
     } catch (err: unknown) {
@@ -75,10 +74,9 @@ export default function PhoneInputScreen({ navigation }: Props) {
         <Input
           value={phone}
           onChangeText={setPhone}
-          placeholder="99999 12345"
+          placeholder="+919876543210"
           keyboardType="phone-pad"
           maxLength={PHONE_MAX_LENGTH}
-          prefix="+91"
           autoFocus
         />
 
