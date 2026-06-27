@@ -5,9 +5,15 @@ import { useChatStore } from '../store/chatStore';
 import { useNotificationStore } from '../store/notificationStore';
 import type { WsServerMessage } from '../types';
 
+const MAX_RECONNECT_DELAY = 30000;
+
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectDelayRef = useRef(1000);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const mountedRef = useRef(true);
+
   const accessToken = useAuthStore((s) => s.accessToken);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
@@ -15,13 +21,24 @@ export function useWebSocket() {
   const setTyping = useChatStore((s) => s.setTyping);
   const addNotification = useNotificationStore((s) => s.addNotification);
 
+  const scheduleReconnect = useCallback(() => {
+    if (!mountedRef.current) return;
+    const delay = reconnectDelayRef.current;
+    reconnectDelayRef.current = Math.min(delay * 2, MAX_RECONNECT_DELAY);
+    reconnectTimeoutRef.current = setTimeout(() => {
+      if (mountedRef.current) connect();
+    }, delay);
+  }, []);
+
   const connect = useCallback(() => {
     if (!isAuthenticated || !accessToken) return;
 
-    const ws = new WebSocket(getWsUrl());
+    const url = `${getWsUrl()}?token=${encodeURIComponent(accessToken)}`;
+    const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => {
+      reconnectDelayRef.current = 1000;
       ws.send(JSON.stringify({ token: accessToken }));
       pingIntervalRef.current = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
@@ -37,16 +54,16 @@ export function useWebSocket() {
       } catch {}
     };
 
-    ws.onclose = () => {
+    ws.onclose = (e) => {
       if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
-      // Reconnect after 3 seconds
-      setTimeout(connect, 3000);
+      if (e.code === 1008 || e.code === 4003 || !mountedRef.current) return;
+      scheduleReconnect();
     };
 
     ws.onerror = () => {
       ws.close();
     };
-  }, [isAuthenticated, accessToken]);
+  }, [isAuthenticated, accessToken, scheduleReconnect]);
 
   const handleServerMessage = (msg: WsServerMessage) => {
     switch (msg.type) {
@@ -86,10 +103,13 @@ export function useWebSocket() {
   };
 
   useEffect(() => {
+    mountedRef.current = true;
     connect();
     return () => {
+      mountedRef.current = false;
       if (wsRef.current) wsRef.current.close();
       if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     };
   }, [connect]);
 
