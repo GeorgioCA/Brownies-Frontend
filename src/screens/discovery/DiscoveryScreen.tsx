@@ -37,6 +37,7 @@ export default function DiscoveryScreen({ navigation }: Props) {
     currentIndex,
     isLoading,
     isRefreshing,
+    error,
     hasMore,
     stats,
     lastMatchId,
@@ -208,6 +209,23 @@ export default function DiscoveryScreen({ navigation }: Props) {
   const renderCardArea = () => {
     if (isLoading && !hasProfiles) {
       return <LoadingSpinner fullScreen message="Finding people near you..." />;
+    }
+
+    if (error && !hasProfiles) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>⚠️</Text>
+          <Text style={styles.emptyTitle}>Could not load profiles</Text>
+          <Text style={styles.emptySubtitle}>{error}</Text>
+          <Button
+            title="Try Again"
+            onPress={handleRefresh}
+            variant="outline"
+            fullWidth={false}
+            style={styles.emptyButton}
+          />
+        </View>
+      );
     }
 
     if (isEmpty) {

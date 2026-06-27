@@ -7,6 +7,7 @@ interface DiscoveryState {
   currentIndex: number;
   isLoading: boolean;
   isRefreshing: boolean;
+  error: string | null;
   page: number;
   hasMore: boolean;
   stats: SwipeStats | null;
@@ -22,11 +23,23 @@ interface DiscoveryState {
   canSwipe: () => boolean;
 }
 
+function extractProfiles(data: unknown): DiscoveryProfile[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    for (const key of ['items', 'profiles', 'results', 'data']) {
+      if (Array.isArray(obj[key])) return obj[key] as DiscoveryProfile[];
+    }
+  }
+  return [];
+}
+
 export const useDiscoveryStore = create<DiscoveryState>((set, get) => ({
   profiles: [],
   currentIndex: 0,
   isLoading: false,
   isRefreshing: false,
+  error: null,
   page: 1,
   hasMore: true,
   stats: null,
@@ -38,21 +51,32 @@ export const useDiscoveryStore = create<DiscoveryState>((set, get) => ({
     if (isRefreshing) return;
     const newPage = refresh ? 1 : page;
 
-    set(refresh ? { isRefreshing: true, currentIndex: 0 } : { isLoading: true });
+    set(refresh ? { isRefreshing: true, error: null, currentIndex: 0 } : { isLoading: true, error: null });
 
     try {
       const res = await discoveryApi.getDiscovery(newPage);
-      const newProfiles: DiscoveryProfile[] = res.data;
-      const merged = refresh ? newProfiles : [...profiles, ...newProfiles];
-      set({
-        profiles: merged,
-        page: newPage + 1,
-        hasMore: newProfiles.length >= 20,
-        isLoading: false,
-        isRefreshing: false,
-      });
-    } catch {
-      set({ isLoading: false, isRefreshing: false });
+      const raw = res.data;
+      const newProfiles = extractProfiles(raw);
+
+      if (refresh) {
+        set({
+          profiles: newProfiles,
+          page: 2,
+          hasMore: newProfiles.length >= 20,
+          isLoading: false,
+          isRefreshing: false,
+        });
+      } else {
+        set({
+          profiles: [...profiles, ...newProfiles],
+          page: newPage + 1,
+          hasMore: newProfiles.length >= 20,
+          isLoading: false,
+        });
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Could not load profiles. Check your connection.';
+      set({ isLoading: false, isRefreshing: false, error: message });
     }
   },
 
